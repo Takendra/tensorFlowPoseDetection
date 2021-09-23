@@ -1,0 +1,8 @@
+Executable : C:\Users\Aman
+arguments : 
+Goel\AppData\Local\Android\Sdk\cmake\3.10.2.4988404\bin\ninja.exe
+-C
+C:\yogaAppR&d\PoseEstimationForMobile-master\android_demo\demo_tflite\app\.cxx\cmake\debug\armeabi-v7a
+jupiter_opencv_320
+jvmArgs : 
+

@@ -1,0 +1,3 @@
+C:/yogaAppR&d/PoseEstimationForMobile-master/android_demo/demo_tflite/app/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/jupiter_opencv_320.dir
+C:/yogaAppR&d/PoseEstimationForMobile-master/android_demo/demo_tflite/app/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/yogaAppR&d/PoseEstimationForMobile-master/android_demo/demo_tflite/app/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/rebuild_cache.dir

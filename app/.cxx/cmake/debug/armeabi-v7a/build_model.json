@@ -1,0 +1,211 @@
+{
+  "abi": "ARMEABI_V7A",
+  "abiPlatformVersion": 23,
+  "buildSettings": {
+    "environmentVariables": []
+  },
+  "cmake": {
+    "cmakeArtifactsBaseFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\.cxx\\cmake\\debug\\armeabi-v7a",
+    "cmakeServerLogFile": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\.cxx\\cmake\\debug\\armeabi-v7a\\cmake_server_log.txt",
+    "cmakeWrappingBaseFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\.cxx\\cxx\\debug\\armeabi-v7a",
+    "effectiveConfiguration": {
+      "name": "traditional-android-studio-cmake-environment",
+      "description": "Composite reified CMakeSettings configuration",
+      "generator": "Ninja",
+      "inheritEnvironments": [
+        "ndk"
+      ],
+      "buildRoot": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\.cxx\\cmake\\debug\\armeabi-v7a",
+      "cmakeToolchain": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529\\build\\cmake\\android.toolchain.cmake",
+      "cmakeExecutable": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+      "variables": [
+        {
+          "name": "CMAKE_CXX_FLAGS",
+          "value": "-std\u003dc++11 -frtti -fexceptions"
+        },
+        {
+          "name": "CMAKE_BUILD_TYPE",
+          "value": "Debug"
+        },
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529\\build\\cmake\\android.toolchain.cmake"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "armeabi-v7a"
+        },
+        {
+          "name": "ANDROID_NDK",
+          "value": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "android-23"
+        },
+        {
+          "name": "CMAKE_ANDROID_ARCH_ABI",
+          "value": "armeabi-v7a"
+        },
+        {
+          "name": "CMAKE_ANDROID_NDK",
+          "value": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529"
+        },
+        {
+          "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
+          "value": "ON"
+        },
+        {
+          "name": "CMAKE_LIBRARY_OUTPUT_DIRECTORY",
+          "value": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\build\\intermediates\\cmake\\debug\\obj\\armeabi-v7a"
+        },
+        {
+          "name": "CMAKE_MAKE_PROGRAM",
+          "value": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+        },
+        {
+          "name": "CMAKE_SYSTEM_NAME",
+          "value": "Android"
+        },
+        {
+          "name": "CMAKE_SYSTEM_VERSION",
+          "value": "23"
+        },
+        {
+          "name": "ANDROID_TOOLCHAIN",
+          "value": "clang"
+        },
+        {
+          "name": "ANDROID_STL",
+          "value": "c++_static"
+        }
+      ]
+    }
+  },
+  "cxxBuildFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\.cxx\\cmake\\debug\\armeabi-v7a",
+  "info": {
+    "abi": "ARMEABI_V7A",
+    "bitness": 32,
+    "deprecated": false,
+    "default": true
+  },
+  "originalCxxBuildFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\.cxx\\cmake\\debug\\armeabi-v7a",
+  "variant": {
+    "buildSystemArgumentList": [
+      "-DANDROID_TOOLCHAIN\u003dclang",
+      "-DANDROID_STL\u003dc++_static"
+    ],
+    "buildTargetSet": [],
+    "cFlagsList": [],
+    "cmakeSettingsConfiguration": "android-gradle-plugin-predetermined-name",
+    "cppFlagsList": [
+      "-std\u003dc++11",
+      "-frtti",
+      "-fexceptions"
+    ],
+    "isDebuggableEnabled": true,
+    "module": {
+      "buildSystem": "CMAKE",
+      "cmake": {
+        "cmakeExe": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+        "minimumCmakeVersion": "3.10.2",
+        "ninjaExe": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+      },
+      "cmakeToolchainFile": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529\\build\\cmake\\android.toolchain.cmake",
+      "cxxFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\.cxx",
+      "gradleModulePathName": ":app",
+      "intermediatesFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\build\\intermediates",
+      "makeFile": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\CMakeLists.txt",
+      "moduleBuildFile": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\build.gradle",
+      "moduleRootFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app",
+      "ndkDefaultAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkFolder": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529",
+      "ndkMetaAbiList": [
+        {
+          "abi": "ARMEABI_V7A",
+          "bitness": 32,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "ARM64_V8A",
+          "bitness": 64,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "X86",
+          "bitness": 32,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "X86_64",
+          "bitness": 64,
+          "deprecated": false,
+          "default": true
+        }
+      ],
+      "ndkMetaPlatforms": {
+        "min": 16,
+        "max": 30,
+        "aliases": {
+          "20": 19,
+          "25": 24,
+          "J": 16,
+          "J-MR1": 17,
+          "J-MR2": 18,
+          "K": 19,
+          "L": 21,
+          "L-MR1": 22,
+          "M": 23,
+          "N": 24,
+          "N-MR1": 24,
+          "O": 26,
+          "O-MR1": 27,
+          "P": 28,
+          "Q": 29,
+          "R": 30
+        }
+      },
+      "ndkSupportedAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkVersion": "21.4.7075529",
+      "project": {
+        "compilerSettingsCacheFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\.cxx",
+        "cxxFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\.cxx",
+        "isBuildOnlyTargetAbiEnabled": true,
+        "isCmakeBuildCohabitationEnabled": false,
+        "isNativeCompilerSettingsCacheEnabled": false,
+        "rootBuildGradleFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite",
+        "sdkFolder": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk"
+      },
+      "splitsAbiFilterSet": [],
+      "stlSharedObjectMap": {
+        "LIBCXX_SHARED": {
+          "ARMEABI_V7A": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\arm-linux-androideabi\\libc++_shared.so",
+          "ARM64_V8A": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\aarch64-linux-android\\libc++_shared.so",
+          "X86": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\libc++_shared.so",
+          "X86_64": "C:\\Users\\Aman Goel\\AppData\\Local\\Android\\Sdk\\ndk\\21.4.7075529\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\libc++_shared.so"
+        },
+        "LIBCXX_STATIC": {},
+        "NONE": {},
+        "SYSTEM": {}
+      }
+    },
+    "objFolder": "C:\\yogaAppR\u0026d\\PoseEstimationForMobile-master\\android_demo\\demo_tflite\\app\\build\\intermediates\\cmake\\debug\\obj",
+    "variantName": "debug",
+    "validAbiList": [
+      "ARMEABI_V7A"
+    ]
+  }
+}
