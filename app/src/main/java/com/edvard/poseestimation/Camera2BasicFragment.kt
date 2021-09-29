@@ -16,18 +16,18 @@
 package com.edvard.poseestimation
 
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.app.AlertDialog
 import android.app.Dialog
 import android.app.DialogFragment
 import android.app.Fragment
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.ImageFormat
-import android.graphics.Matrix
-import android.graphics.Point
-import android.graphics.RectF
-import android.graphics.SurfaceTexture
+import android.graphics.*
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -37,9 +37,7 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.CaptureResult
 import android.hardware.camera2.TotalCaptureResult
 import android.media.ImageReader
-import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
+import android.os.*
 import android.support.v13.app.FragmentCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
@@ -51,19 +49,32 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Collections
-import java.util.Comparator
+import java.io.OutputStream
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
+import android.graphics.Bitmap
+import android.hardware.display.DisplayManager
+import android.hardware.display.VirtualDisplay
+import android.media.MediaRecorder
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
+import android.os.Environment
+import android.support.v4.content.LocalBroadcastManager
+import java.util.*
+import android.util.DisplayMetrics
+import android.util.SparseIntArray
+
 
 /**
  * Basic fragments for the Camera.
  */
 class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResultCallback {
 
+  private var startRecording: Boolean=false
   private val lock = Any()
   private var runClassifier = false
   private var checkedPermissions = false
@@ -73,6 +84,23 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
   private var drawView: DrawView? = null
   private var classifier: ImageClassifier? = null
   private var layoutBottom: ViewGroup? = null
+
+
+ /*video recorder vars*/
+
+  private val TAG = "Takendra"
+  private val REQUESTCODE = 1000
+  private var mScreenDensity = 0
+  private var mProjectionManager: MediaProjectionManager? = null
+
+  private var mMediaProjection: MediaProjection? = null
+  private var mVirtualDisplay: VirtualDisplay? = null
+  private var mMediaProjectionCallback: MediaProjectionCallback? = null
+  private var mMediaRecorder: MediaRecorder? = null
+  private var mBroadcastReceiver: BroadcastReceiver? = null
+  private var folderName:String="/yogaApp/"
+ /*video recorder vars*/
+
 
   /**
    * [TextureView.SurfaceTextureListener] handles several lifecycle events on a [ ].
@@ -273,8 +301,23 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
     layoutBottom = view.findViewById(R.id.layout_bottom)
 //    if (classifier != null)
 //      drawView!!.setImgSize(classifier!!.imageSizeX, classifier!!.imageSizeY)
+
+
+    val metrics = DisplayMetrics()
+    activity.windowManager.defaultDisplay.getMetrics(metrics)
+    mScreenDensity = metrics.densityDpi
+
+    //DISPLAY_HEIGHT=metrics.heightPixels
+    //DISPLAY_WIDTH=metrics.widthPixels
+
+    mMediaRecorder= MediaRecorder()
+    mProjectionManager=activity.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+
   }
 
+  override fun onStop() {
+    super.onStop()
+  }
   /**
    * Load the model and labels.
    */
@@ -316,8 +359,18 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
 
   override fun onDestroy() {
     classifier!!.close()
+    mBroadcastReceiver?.let { LocalBroadcastManager.getInstance(activity).unregisterReceiver(it) }
+
+    //takendra
+    mMediaRecorder!!.stop()
+    mMediaRecorder!!.reset()
+    Log.v(TAG, "Stopping Recording")
+    stopScreenSharing()
+
     super.onDestroy()
+
   }
+
 
   /**
    * Sets up member variables related to camera.
@@ -647,12 +700,25 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
     //Log.d("DrawPoints",""+classifier!!.mPrintPointArray!!)
 
     Log.d("DrawPoints","=======DrawPoints Read starts=====")
+    var a:Int=0
+    var filename = StringBuilder()
+    var xCoordinates= StringBuilder()
+    var yCoordinates=StringBuilder()
     for(i in 0 until classifier!!.mPrintPointArray!!.size)
     {
         var filterLabelProbArray=classifier!!.mPrintPointArray!![i]
       for (j in 0 until filterLabelProbArray.size)
       {
         Log.d("DrawPoints",""+filterLabelProbArray[j])
+        if(i==0)
+          xCoordinates.append(filterLabelProbArray[j])
+        if(i==1)
+          yCoordinates.append(filterLabelProbArray[j])
+
+
+        filename.append(filterLabelProbArray[j]).append(" ")
+        if(filterLabelProbArray[j]>0)
+          a= filterLabelProbArray[j].roundToInt()
       }
 
 
@@ -662,7 +728,247 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
 
 
     showToast(textToShow)
+    activity.runOnUiThread()
+    {
+      if(!startRecording) {
+        initRecorder()
+        shareScreen()
+        deleteOldCoordinatesFile()
+        startRecording=true
+      }
+    }
+
+    //val bitmap1: Bitmap? = getScreenShotFromView(drawView!!.rootView.fi)
+    val bitmap1: Bitmap? = takeScreenshot()
+    bitmap1?.let {
+      if(a>0) {
+        this.saveMediaToStorage(it, fileName = filename.toString())
+        createTextFile(filename.toString(),xCoordinates = xCoordinates.toString(),yCoordinates = yCoordinates.toString())
+        Log.d("DrawPoints",filename.toString())
+      }
+    }
   }
+  private fun initRecorder() {
+    try {
+      mMediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
+      mMediaRecorder!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
+      mMediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+      mMediaRecorder!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+      mMediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+      mMediaRecorder!!.setOutputFile(
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+          .toString() + "/YogaVideos.mp4"
+      )
+      mMediaRecorder!!.setVideoSize(
+        DISPLAY_WIDTH,
+        DISPLAY_HEIGHT
+      )
+      mMediaRecorder!!.setVideoEncodingBitRate(512 * 1000)
+      mMediaRecorder!!.setVideoFrameRate(30)
+      val rotation: Int = activity.windowManager.defaultDisplay.rotation
+      val orientation: Int = ORIENTATIONS.get(rotation + 90)
+      mMediaRecorder!!.setOrientationHint(orientation)
+      mMediaRecorder!!.prepare()
+    } catch (e: IOException) {
+      e.printStackTrace()
+    }
+  }
+  private fun shareScreen() {
+    if (mMediaProjection == null) {
+      startActivityForResult(
+        mProjectionManager!!.createScreenCaptureIntent(),
+        REQUESTCODE)
+      return
+    }
+    mVirtualDisplay = createVirtualDisplay()
+    mMediaRecorder!!.start()
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+
+    if (resultCode != RESULT_OK) {
+      Toast.makeText(
+        activity,
+        "Screen Cast Permission Denied", Toast.LENGTH_SHORT
+      ).show()
+      return
+    }
+    Log.d(TAG,"Permission given ")
+    val intent = Intent(activity, MyService::class.java)
+    // For Android O and newer, you must start a foreground service
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      activity.startForegroundService(intent)
+    } else {
+      activity.startService(intent)
+    }
+
+    mBroadcastReceiver = object : BroadcastReceiver() {
+      override fun onReceive(context: Context, intent: Intent) {
+        val message = intent.getStringExtra(RECEIVER_MESSAGE)
+        Log.d(TAG, message!!)
+        if (message.equals("startMediaRecorder", ignoreCase = true)) {
+          startMediaRecorder(resultCode, data!!)
+        }
+      }
+    }
+
+
+    LocalBroadcastManager.getInstance(activity).registerReceiver(mBroadcastReceiver as BroadcastReceiver, IntentFilter(RECEIVER_INTENT))
+
+
+  }
+  private fun startMediaRecorder(resultCode: Int, data: Intent) {
+    mMediaProjectionCallback = MediaProjectionCallback()
+    mMediaProjection = mProjectionManager!!.getMediaProjection(resultCode, data)
+    mMediaProjection!!.registerCallback(mMediaProjectionCallback, null)
+    mVirtualDisplay = createVirtualDisplay()
+    mMediaRecorder!!.start()
+  }
+  private inner class MediaProjectionCallback : MediaProjection.Callback() {
+    override fun onStop() {
+
+      mMediaRecorder!!.stop()
+      mMediaRecorder!!.reset()
+      Log.d(TAG, "Recording Stopped")
+      mMediaProjection = null
+      stopScreenSharing()
+
+    }
+  }
+
+  private fun stopScreenSharing() {
+    if (mVirtualDisplay == null) {
+      return
+    }
+    mVirtualDisplay!!.release()
+    //mMediaRecorder.release(); //If used: mMediaRecorder object cannot
+    // be reused again
+    destroyMediaProjection()
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+  }
+  private fun destroyMediaProjection() {
+    if (mMediaProjection != null) {
+      mMediaProjection!!.unregisterCallback(mMediaProjectionCallback)
+      mMediaProjection!!.stop()
+      mMediaProjection = null
+    }
+    Log.d(TAG, "MediaProjection Stopped")
+  }
+  private fun createVirtualDisplay(): VirtualDisplay? {
+    return mMediaProjection!!.createVirtualDisplay(
+      "CameraActivity",
+      DISPLAY_WIDTH,
+      DISPLAY_HEIGHT,
+      mScreenDensity,
+      DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+      mMediaRecorder!!.surface,
+      null /*Callbacks*/,
+      null /*Handler*/
+    )
+  }
+
+
+
+  private fun getScreenShotFromView(v: View): Bitmap? {
+    // create a bitmap object
+    var screenshot: Bitmap? = null
+    try {
+      // inflate screenshot object
+      // with Bitmap.createBitmap it
+      // requires three parameters
+      // width and height of the view and
+      // the background color
+      screenshot = Bitmap.createBitmap(v.measuredWidth, v.measuredHeight, Bitmap.Config.ARGB_8888)
+      // Now draw this bitmap on a canvas
+      val canvas = Canvas(screenshot)
+      v.draw(canvas)
+    } catch (e: Exception) {
+      Log.e("GFG", "Failed to capture screenshot because:" + e.message)
+    }
+    // return the bitmap
+    return screenshot
+  }
+  private fun deleteOldCoordinatesFile()
+  {
+    val f = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Coordinates.txt")
+    if(f.exists())
+      f.delete()
+  }
+private fun createTextFile(frameFileName:String,xCoordinates:String,yCoordinates:String) {
+  val f = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Coordinates.txt")
+  f.appendText(xCoordinates+"\n")
+  f.appendText(yCoordinates+"\n")
+  f.appendText("frameFileName=$frameFileName\n")
+  f.appendText("----------------------------------------------------------\n")
+}
+  private fun takeScreenshot(): Bitmap?  {
+    return try {
+      // create bitmap screen capture
+      val v1: View = activity.window.decorView.rootView
+      v1.isDrawingCacheEnabled = true
+      val bitmap = Bitmap.createBitmap(v1.drawingCache)
+      v1.isDrawingCacheEnabled = false
+      bitmap
+    } catch (e: Throwable) {
+      // Several error may come out with file handling or DOM
+      e.printStackTrace()
+      null
+    }
+  }
+  // this method saves the image to gallery
+  private fun saveMediaToStorage(bitmap: Bitmap,fileName:String) {
+    // Generating a file name
+    //val filename = "${System.currentTimeMillis()}.jpg"
+    val filename = "${fileName}.jpg"
+
+    // Output stream
+    var fos: OutputStream? = null
+
+    // For devices running android >= Q
+  /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      // getting the contentResolver
+      this.contentResolver?.also { resolver ->
+
+        // Content resolver will process the contentvalues
+        val contentValues = ContentValues().apply {
+
+          // putting file information in content values
+          put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+          put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
+          put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+        }
+
+        // Inserting the contentValues to
+        // contentResolver and getting the Uri
+        val imageUri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        // Opening an outputstream with the Uri that we got
+        fos = imageUri?.let { resolver.openOutputStream(it) }
+      }
+    } else {*/
+      // These for devices running on android < Q
+     // val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+      val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+      val image = File(imagesDir, filename)
+      fos = FileOutputStream(image)
+    //}
+
+    fos?.use {
+      // Finally writing the bitmap to the output stream that we opened
+      bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+
+      val activity = activity
+      activity?.runOnUiThread {
+        Toast.makeText(activity , "Captured View and saved to Gallery" , Toast.LENGTH_SHORT).show()
+      }
+    }
+  }
+
+
 
   /**
    * Compares two `Size`s based on their areas.
@@ -714,6 +1020,20 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
     /**
      * Tag for the [Log].
      */
+    const val RECEIVER_INTENT: String = "RECEIVER_INTENT"
+    const val RECEIVER_MESSAGE:String = "RECEIVER_MESSAGE"
+
+    private var DISPLAY_WIDTH = 720
+    private var DISPLAY_HEIGHT = 1520
+
+  private val ORIENTATIONS=SparseIntArray()
+    init {
+      ORIENTATIONS.append(Surface.ROTATION_0, 90)
+      ORIENTATIONS.append(Surface.ROTATION_90, 0)
+      ORIENTATIONS.append(Surface.ROTATION_180, 270)
+      ORIENTATIONS.append(Surface.ROTATION_270, 180)
+    }
+
     private const val TAG = "TfLiteCameraDemo"
 
     private const val FRAGMENT_DIALOG = "dialog"

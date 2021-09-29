@@ -16,6 +16,7 @@
 package com.edvard.poseestimation
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 
 import org.opencv.android.BaseLoaderCallback
@@ -57,6 +58,11 @@ class CameraActivity : Activity() {
     }
   }
 
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+
+  }
+
   override fun onResume() {
     super.onResume()
     if (!OpenCVLoader.initDebug()) {
@@ -76,4 +82,5 @@ class CameraActivity : Activity() {
     @JvmStatic
     var isOpenCVInit = false
   }
+
 }
