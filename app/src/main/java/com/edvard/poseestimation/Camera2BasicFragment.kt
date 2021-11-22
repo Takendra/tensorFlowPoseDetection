@@ -98,7 +98,7 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
   private var mMediaProjectionCallback: MediaProjectionCallback? = null
   private var mMediaRecorder: MediaRecorder? = null
   private var mBroadcastReceiver: BroadcastReceiver? = null
-  private var folderName:String="/yogaApp/"
+  private var folderName:String="yogaApp/"
  /*video recorder vars*/
 
 
@@ -733,7 +733,8 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
       if(!startRecording) {
         initRecorder()
         shareScreen()
-        deleteOldCoordinatesFile()
+        //deleteOldCoordinatesFile()
+        deleteAppDirectory()
         startRecording=true
       }
     }
@@ -742,8 +743,8 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
     val bitmap1: Bitmap? = takeScreenshot()
     bitmap1?.let {
       if(a>0) {
-        this.saveMediaToStorage(it, fileName = filename.toString())
-        createTextFile(filename.toString(),xCoordinates = xCoordinates.toString(),yCoordinates = yCoordinates.toString())
+        this.saveMediaToStorage(it, fileName = filename.toString().plus("($textToShow)"))
+        createTextFile(filename.toString().plus("($textToShow)"),frameTime = textToShow,xCoordinates = xCoordinates.toString(),yCoordinates = yCoordinates.toString())
         Log.d("DrawPoints",filename.toString())
       }
     }
@@ -892,17 +893,26 @@ class Camera2BasicFragment : Fragment(), FragmentCompat.OnRequestPermissionsResu
     // return the bitmap
     return screenshot
   }
-  private fun deleteOldCoordinatesFile()
+  private fun deleteAppDirectory()
   {
-    val f = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Coordinates.txt")
-    if(f.exists())
-      f.delete()
+    val downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    val appDirectory=File(downloadDirectory,folderName)
+    appDirectory.deleteRecursively()
   }
-private fun createTextFile(frameFileName:String,xCoordinates:String,yCoordinates:String) {
-  val f = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Coordinates.txt")
-  f.appendText(xCoordinates+"\n")
-  f.appendText(yCoordinates+"\n")
+
+private fun createTextFile(frameFileName:String,frameTime:String,xCoordinates:String,yCoordinates:String) {
+
+  val downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+  val appDirectory=File(downloadDirectory,folderName)
+  if(!appDirectory.exists())
+    appDirectory.mkdir()
+
+  //val f = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Coordinates.txt")
+  val f = File(appDirectory, "Coordinates.txt")
+  f.appendText("xCoordinates=$xCoordinates\n")
+  f.appendText("yCoordinates=$yCoordinates\n")
   f.appendText("frameFileName=$frameFileName\n")
+  f.appendText("Epoch=$frameTime\n")
   f.appendText("----------------------------------------------------------\n")
 }
   private fun takeScreenshot(): Bitmap?  {
@@ -952,8 +962,12 @@ private fun createTextFile(frameFileName:String,xCoordinates:String,yCoordinates
     } else {*/
       // These for devices running on android < Q
      // val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-      val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-      val image = File(imagesDir, filename)
+       val downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+       val appDirectory=File(downloadDirectory,folderName)
+       if(!appDirectory.exists())
+         appDirectory.mkdir()
+
+     val image = File(appDirectory, filename)
       fos = FileOutputStream(image)
     //}
 
